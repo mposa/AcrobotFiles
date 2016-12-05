@@ -16,7 +16,7 @@ for i=1:n,
   channels{i} = java.lang.String(channels{i}).hashCode();
 end
 
-display_frac = .1;
+display_frac = floor(start_frac/.1)*.1 + .1;
 
 %%
 while log.getPositionFraction < end_frac

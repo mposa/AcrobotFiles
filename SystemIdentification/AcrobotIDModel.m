@@ -1,4 +1,4 @@
-function [dx, y] = AcrobotIDModel(t,x,u,m1,m2,l1,lc1,lc2,b1,b2,I1,I2)
+function [dx, y] = AcrobotIDModel(t,x,u,m1,m2,l1,lc1,lc2,b1,b2,I1,I2,options)
 % Parameterized model for system identification
 % Outputs 
 %   dx = [qd;qdd]

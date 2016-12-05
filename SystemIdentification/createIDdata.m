@@ -5,7 +5,7 @@
 %load dataTraj.mat
 
 % Subsample and get theta derivatives
-dt = 0.005; % CHANGE BOTTOM TOO IF YOU CHANGE THIS
+dt = 0.005; 
 t_sample = t(1):dt:t(end);
 dt = diff(t_sample(1:2));
 theta1_spl = spline(t,theta1);
@@ -22,4 +22,4 @@ torque = ppval(torque_spl,t_sample);
 outputs_full = [theta1;theta2;theta1_dot;theta2_dot];
 outputs = [theta1;theta2];
 
-zTraj = iddata(outputs',torque',0.005);
+zTraj = iddata(outputs',torque',dt);
