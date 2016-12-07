@@ -27,6 +27,10 @@ classdef AcrobotPlantSmooth < Manipulator
     I1 = 0.6658;
     I2 = 0.2267;
     
+    % December 7, 2016 (mposa)
+    % with masses
+    
+    
     
     l2 = 0.5;
     g = 9.81;
@@ -34,9 +38,26 @@ classdef AcrobotPlantSmooth < Manipulator
   end
   
   methods
-    function obj = AcrobotPlantSmooth()
+    function obj = AcrobotPlantSmooth(params)
       obj = obj@Manipulator(2,1,2);
       obj = obj.setOutputFrame(obj.getStateFrame);
+      
+      if nargin < 1
+        % July 26
+%         params = [2.2244 0.5508 0.5134 0.8039 0.8362 0.2078 0.0390 0.8999 0.2293];
+        % December 7, 2016 (mposa)
+        % with masses
+        params =  [1.8719    0.1486    0.5131    1.0536    3.0806    0.2048    0.0391    0.9953    0.2282];
+      end
+      obj.m1 = params(1);
+      obj.m2 = params(2);
+      obj.l1 = params(3);
+      obj.lc1 = params(4);
+      obj.lc2 = params(5);
+      obj.b1 = params(6);
+      obj.b2 = params(7);
+      obj.I1 = params(8);
+      obj.I2 = params(9);
     end    
     
     function [H,C,B,dH,dC,dB] = manipulatorDynamics(obj,q,v)      

@@ -1,5 +1,7 @@
 clear all
 addpath('../')
+checkDependency('lcm');
+javaaddpath('../LCMTypes/acrobot_types.jar')
 
 filenames = {'12-02-2016/lcmlog-2016-12-02.00',...
   '12-02-2016/lcmlog-2016-12-02.01',...
@@ -24,6 +26,14 @@ end
 data_bkp = sysiddata;
 x0_bkp = x0;
 
+%%
+sysiddata = data_bkp;
+x0 = x0_bkp;
+for i=1:length(sysiddata)
+  maxv(i) = min(max(abs(data{i}{2}.data(3:4.,:))'));
+  meanu(i) = mean(abs(data{i}{3}.data));
+end
+
 
 %%
 for i=1:length(sysiddata)
@@ -33,8 +43,9 @@ for i=1:length(sysiddata)
   x0{i}(1:2) = wrapToPi(x0{i}(1:2));
 end
 
+I = find(maxv > .5 & meanu < .05);
 % remove 4,7,18,19,21,29,31,52,55,59,62,65,66,68,72
-I = setdiff(1:length(sysiddata),[4,6,7,18,19,21,29,31,52,55,59,62,65,66,68,72]);
+I = setdiff(I,[4,6,7,18,19,21,29,31,52,55,59,62,65,66,68,72]);
 % I = [1, 3:7, 9:length(sysiddata)];
 % I = [1, 3:7];
 
@@ -121,7 +132,7 @@ end
 
 nlgr = idnlgrey(FileName, Order, InitParams, InitialStates, Ts);
 %%
-nlgr = pem(z, nlgr, 'Display', 'Full','MaxIter',10);
+nlgr = pem(z, nlgr, 'Display', 'Full','MaxIter',20);
 
 figure;
 compare(getexp(z,1), nlgr);
@@ -130,7 +141,7 @@ compare(getexp(z,1), nlgr);
 
 %%
 p = nlgr.Report.Parameters;
-
+[p.InitialValues.ParVector, p.ParVector]
 % % Test on other data
 % ztest = merge(z3,z4,z5); %iddata(outputs2,torque2,dt);
 % figure;
