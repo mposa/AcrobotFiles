@@ -3,7 +3,7 @@ p = AcrobotPlantSmooth;
 p=p.setInputLimits(-9,9);
 v = AcrobotVisualizer(p);
 N = 100;
-T = 10;
+T = 15;
 T0 = T/2;
 
 
@@ -35,13 +35,14 @@ traj_opt = traj_opt.addRunningCost(@running_cost_fun);
 traj_opt = traj_opt.addFinalCost(@final_cost_fun);
 traj_opt = traj_opt.addStateConstraint(ConstantConstraint(x0),1);
 traj_opt = traj_opt.addStateConstraint(ConstantConstraint(xf),N);
-traj_opt = traj_opt.addInputConstraint(BoundingBoxConstraint(-6,6),1:N);
+traj_opt = traj_opt.addInputConstraint(BoundingBoxConstraint(-5,5),1:N);
 % traj_opt = traj_opt.addLinearStateConstraint(LinearConstraint(xf,xf,eye(4)),N);
 
-max_vel = 3*pi;
+
 
 traj_opt = traj_opt.addStateConstraint(BoundingBoxConstraint(-1.5*pi,1.5*pi),1:N,2);
-% 
+
+% max_vel = 3*pi;
 % traj_opt = traj_opt.addStateConstraint(BoundingBoxConstraint(-max_vel,max_vel),1:N,3);
 % traj_opt = traj_opt.addStateConstraint(BoundingBoxConstraint(-max_vel,max_vel),1:N,4);
 
@@ -53,7 +54,7 @@ end
 
 function [f,df] = running_cost_fun(h,x,u)
   R = 1;
-  Q = 5*diag([0;0;1;1]);
+  Q = 0*diag([0;0;1;1]);
   f = h*(u'*R*u + x'*Q*x);
   df = [(u'*R*u + x'*Q*x) 2*h*x'*Q 2*h*u'*R];
 end
