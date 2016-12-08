@@ -3,13 +3,32 @@ addpath('../')
 checkDependency('lcm');
 javaaddpath('../LCMTypes/acrobot_types.jar')
 
-filenames = {'12-02-2016/lcmlog-2016-12-02.00',...
-  '12-02-2016/lcmlog-2016-12-02.01',...
-  '12-02-2016/lcmlog-2016-12-02.02',...
-  '12-02-2016/lcmlog-2016-12-02.03'};
-start = [.4;.4;.1;.4];
-% finish = [1;1;.3;1];
-finish = [.5;1;.3;1];
+% filenames = {'12-02-2016/lcmlog-2016-12-02.00',...
+%   '12-02-2016/lcmlog-2016-12-02.01',...
+%   '12-02-2016/lcmlog-2016-12-02.02',...
+%   '12-02-2016/lcmlog-2016-12-02.03'};
+% start = [.4;.4;.1;.4];
+% % finish = [1;1;.3;1];
+% finish = [.5;1;.3;1];
+
+% filenames = {'12-07-2016/sine_1Hz_6.log',...
+%   '12-07-2016/sine_1Hz_3.log',...
+%   '12-07-2016/sine_2Hz_6.log',...
+%   '12-07-2016/sine_0_5Hz_6.log',...
+%   '12-07-2016/sine_0_5Hz_3.log'};
+%   %'12-07-2016/sine_2Hz_3.log',...
+% 
+% start = [.33, .2, .45, .42, .36]; %.45,
+% finish = [.7, .75, .9, .88, .85]; % .85, 
+
+
+filenames = {'12-07-2016/sine_1Hz_6.log',...
+  '12-07-2016/sine_2Hz_6.log',...
+  '12-07-2016/sine_0_5Hz_6.log'};
+
+start = [.4, .5, .42] ; %.45,
+finish = [.6,  .6, .5]; % .85, 
+
 
 % filenames = filenames(1);
 
@@ -17,7 +36,8 @@ sysiddata = {};
 x0 = {};
 data = {};
 for i=1:length(filenames),
-  file_times = start(i):.02:finish(i);
+%   file_times = start(i):.02:finish(i);
+  file_times = [start(i):.02:finish(i)];
   for j=1:length(file_times)-1,
     [sysiddata{end+1},x0{end+1},data{end+1}] = createIDDataFromLog(filenames{i},file_times(j),file_times(j+1));
   end
@@ -29,26 +49,36 @@ x0_bkp = x0;
 %%
 sysiddata = data_bkp;
 x0 = x0_bkp;
+
+
+% 
+% sysiddata = sysiddata(1);
+% x0 = x0(1);
 for i=1:length(sysiddata)
-  maxv(i) = min(max(abs(data{i}{2}.data(3:4.,:))'));
-  meanu(i) = mean(abs(data{i}{3}.data));
+%   maxv(i) = min(max(abs(data{i}{2}.data(3:4.,:))'));
+%   meanu(i) = mean(abs(data{i}{3}.data));
+  maxdt(i) = max(diff(data{i}{3}.t));
 end
 
 
 %%
-for i=1:length(sysiddata)
-  sysiddata{i}.OutputData(:,1) = wrapToPi(sysiddata{i}.OutputData(:,1));
-  sysiddata{i}.OutputData(:,2) = wrapToPi(sysiddata{i}.OutputData(:,2));
-  
-  x0{i}(1:2) = wrapToPi(x0{i}(1:2));
-end
+% for i=1:length(sysiddata)
+%   sysiddata{i}.OutputData(:,1) = wrapToPi(sysiddata{i}.OutputData(:,1));
+%   sysiddata{i}.OutputData(:,2) = wrapToPi(sysiddata{i}.OutputData(:,2));
+%   
+%   x0{i}(1:2) = wrapToPi(x0{i}(1:2));
+% end
 
-I = find(maxv > .5 & meanu < .05);
+% cut segments with low velocity and low inputs
+% I = find(maxv > .5 & meanu > .05);
 % remove 4,7,18,19,21,29,31,52,55,59,62,65,66,68,72
-I = setdiff(I,[4,6,7,18,19,21,29,31,52,55,59,62,65,66,68,72]);
+% I = setdiff(I,[4,6,7,18,19,21,29,31,52,55,59,62,65,66,68,72]);
 % I = [1, 3:7, 9:length(sysiddata)];
 % I = [1, 3:7];
 
+% I = 1:length(sysiddata);
+% I = setdiff(I, [3 4 8 12 13 16 23]);
+I = find(maxdt < .01);
 sysiddata=sysiddata(I);
 x0=x0(I);
 
@@ -94,11 +124,14 @@ InitParams(8).Minimum = .01;
 
 InitParams(9).Name = 'I2';
 InitParams(9).Minimum = .01;
+
+InitParams(10).Name = 'r1';
+InitParams(10).Minimum = -inf;
   
 % from 12/5
-Parameters =     [    2.2244    0.5508    0.5134    0.8039    0.8362    0.2078    0.0390    0.8999    0.2293];
+Parameters =     [    2.2244    0.5508    0.5134    0.8039    0.8362    0.2078    0.0390    0.8999    0.2293 0];
   
-for i=1:9,
+for i=1:length(InitParams),
   InitParams(i).Value = Parameters(i);
   InitParams(i).Maximum = inf;
   InitParams(i).Unit = '';
@@ -132,10 +165,10 @@ end
 
 nlgr = idnlgrey(FileName, Order, InitParams, InitialStates, Ts);
 %%
-nlgr = pem(z, nlgr, 'Display', 'Full','MaxIter',20);
+nlgr = pem(z, nlgr, 'Display', 'Full','MaxIter',100);
 
-figure;
-compare(getexp(z,1), nlgr);
+% figure;
+% compare(getexp(z,1), nlgr);
 % plot(sysiddata{56}.InputData)
 % plot(sysiddata{56}.OutputData)
 
@@ -146,3 +179,23 @@ p = nlgr.Report.Parameters;
 % ztest = merge(z3,z4,z5); %iddata(outputs2,torque2,dt);
 % figure;
 % compare(ztest,nlgr);
+
+% 8,12, 39, 41, 44, 45, 49, 51, 53, 55, 80
+%%
+i = i+1
+plant = AcrobotPlantSmooth(p.ParVector);
+experiment = getexp(z,i);
+t_exp = experiment.Ts*(0:length(experiment.InputData)-1);
+utraj = PPTrajectory(foh(t_exp,experiment.InputData'));
+utraj = utraj.setOutputFrame(plant.getInputFrame);
+plant_ol = utraj.cascade(plant);
+% traj = plant_ol.simulate([0 t_exp(end)],x0{i});
+traj = plant_ol.simulate([0 t_exp(end)],nlgr.Report.Parameters.X0(:,i));
+
+x_exp = traj.eval(t_exp);
+figure(2)
+subplot(2,1,1)
+plot(t_exp,experiment.OutputData(:,1),t_exp,x_exp(1,:))
+subplot(2,1,2)
+plot(t_exp,experiment.OutputData(:,2),t_exp,x_exp(2,:))
+legend('exp','fit')

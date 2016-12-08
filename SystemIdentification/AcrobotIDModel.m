@@ -1,4 +1,4 @@
-function [dx, y] = AcrobotIDModel(t,x,u,m1,m2,l1,lc1,lc2,b1,b2,I1,I2,options)
+function [dx, y] = AcrobotIDModel(t,x,u,m1,m2,l1,lc1,lc2,b1,b2,I1,I2,r1,options)
 % Parameterized model for system identification
 % Outputs 
 %   dx = [qd;qdd]
@@ -27,12 +27,20 @@ c = cos(q(1:2,:));  s = sin(q(1:2,:));  s12 = sin(q(1,:)+q(2,:));
       
 h12 = I2 + m2l1lc2*c(2);
 H = [ I1 + I2 + m2*l1^2 + 2*m2l1lc2*c(2), h12; h12, I2 ];
+
+m2r12 = m2*r1^2;
+m2l1r1s2 = m2*r1*l1*s(2);
+m2l1r1c2 = m2*r1*l1*c(2);
+H2 =  [m2r12+2*m2l1r1s2, m2r12+m2l1r1s2; m2r12+m2l1r1s2, m2r12];
+H = H+H2;
       
 C = [ -2*m2l1lc2*s(2)*qd(2), -m2l1lc2*s(2)*qd(2); m2l1lc2*s(2)*qd(1), 0 ];
 G = g*[ m1*lc1*s(1) + m2*(l1*s(1)+lc2*s12); m2*lc2*s12 ];
+
+C2 = [g*m2*r1*(s(2)*s(1)-c(2)*c(1)) + m2l1r1c2*(qd(2)^2+2*qd(1)*qd(2));  g*m2*r1*(s(2)*s(1)-c(2)*c(1))-m2l1r1c2*qd(2)^2];
             
 % accumate total C and add a damping term:
-C = C*qd + G + [b1;b2].*qd;
+C = C*qd + G + [b1;b2].*qd + C2;
 
 B = [0; 1];
 

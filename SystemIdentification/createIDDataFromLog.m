@@ -32,8 +32,9 @@ function [sysdata,x0, data] = createIDDataFromLog(filename,start,finish)
   
   t = t-t(1);
   
-  outputs = x(1:2,:);
-  inputs = u;
+  outputs = y(1:2,:);
+%   inputs = u;
+  inputs = y(3,:);
   
   sysdata = iddata(outputs',inputs',dt);
   x0 = x(:,1);

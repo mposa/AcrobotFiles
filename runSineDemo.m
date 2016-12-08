@@ -38,4 +38,5 @@ sys = estimator.cascade(uc);
 P0 = diag([1;1;1;1;.05;.05]);  % initial covariance
 init_state = estimator.wrapState(0,[x0;0;0],P0);
 display('Starting sine demo commands now')
-runLCM(sys,init_state,[]);
+options = struct();
+runLCM(sys,init_state,options);

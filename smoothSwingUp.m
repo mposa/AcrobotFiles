@@ -2,8 +2,8 @@ function [p,v,xtraj,utraj,z,F,info,traj_opt] = smoothSwingUp(xtraj,utraj)
 p = AcrobotPlantSmooth;
 p=p.setInputLimits(-9,9);
 v = AcrobotVisualizer(p);
-N = 50;
-T = 5;
+N = 100;
+T = 10;
 T0 = T/2;
 
 
@@ -35,10 +35,13 @@ traj_opt = traj_opt.addRunningCost(@running_cost_fun);
 traj_opt = traj_opt.addFinalCost(@final_cost_fun);
 traj_opt = traj_opt.addStateConstraint(ConstantConstraint(x0),1);
 traj_opt = traj_opt.addStateConstraint(ConstantConstraint(xf),N);
-traj_opt = traj_opt.addInputConstraint(BoundingBoxConstraint(-7,7),1:N);
+traj_opt = traj_opt.addInputConstraint(BoundingBoxConstraint(-6,6),1:N);
 % traj_opt = traj_opt.addLinearStateConstraint(LinearConstraint(xf,xf,eye(4)),N);
 
-% max_vel = 3*pi;
+max_vel = 3*pi;
+
+traj_opt = traj_opt.addStateConstraint(BoundingBoxConstraint(-1.5*pi,1.5*pi),1:N,2);
+% 
 % traj_opt = traj_opt.addStateConstraint(BoundingBoxConstraint(-max_vel,max_vel),1:N,3);
 % traj_opt = traj_opt.addStateConstraint(BoundingBoxConstraint(-max_vel,max_vel),1:N,4);
 

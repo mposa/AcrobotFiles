@@ -2,7 +2,7 @@ checkDependency('lcm');
 javaaddpath('LCMTypes/acrobot_types.jar')
 
 % filename = 'AcrobotLogs/11-11-2016/lcmlog-2016-11-11.00';
-filename = '12-02-2016/lcmlog-2016-12-02.03';
+filename = '12-07-2016/sine_0_5Hz_6.log';
 
 setenv('PYTHONPATH',strcat(pwd,'/LCMTypes/'));
   oldfile = strcat('AcrobotLogs/',filename);
@@ -36,6 +36,9 @@ u = interp1(data{3}.t(Iu),u,t,'linear','extrap');
 y(1:2,:) = y(1:2,:) + repmat(x(1:2,1) - y(1:2,1),1,length(t));
 
 t = t-t(1);
+
+figure(1)
+plot(t/t(end),y)
 %%
 
 xdot = x*0;
@@ -56,9 +59,11 @@ vdot_diff_filt = [filter(hamming(5),sum(hamming(5)),vdot_diff(1,:)); filter(hamm
 figure(3)
 subplot(2,1,1)
 plot(t,vdot_diff(1,:),t,xdot(3,:))
+legend('diff','model')
+title('vdot comparison')
 subplot(2,1,2)
 plot(t,vdot_diff(2,:),t,xdot(4,:))
-
+legend('diff','model')
 % %% mimic state estimate
 % x_est = x*0;
 % x_est(:,1) = x(:,1);
