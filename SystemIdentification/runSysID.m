@@ -11,23 +11,29 @@ javaaddpath('../LCMTypes/acrobot_types.jar')
 % % finish = [1;1;.3;1];
 % finish = [.5;1;.3;1];
 
-% filenames = {'12-07-2016/sine_1Hz_6.log',...
-%   '12-07-2016/sine_1Hz_3.log',...
-%   '12-07-2016/sine_2Hz_6.log',...
-%   '12-07-2016/sine_0_5Hz_6.log',...
-%   '12-07-2016/sine_0_5Hz_3.log'};
-%   %'12-07-2016/sine_2Hz_3.log',...
-% 
-% start = [.33, .2, .45, .42, .36]; %.45,
-% finish = [.7, .75, .9, .88, .85]; % .85, 
-
-
 filenames = {'12-07-2016/sine_1Hz_6.log',...
+  '12-07-2016/sine_1Hz_3.log',...
   '12-07-2016/sine_2Hz_6.log',...
-  '12-07-2016/sine_0_5Hz_6.log'};
+  '12-07-2016/sine_0_5Hz_6.log',...
+  '12-07-2016/sine_0_5Hz_3.log'};
+  %'12-07-2016/sine_2Hz_3.log',...
 
-start = [.4, .5, .42] ; %.45,
-finish = [.6,  .6, .5]; % .85, 
+start = [.33, .2, .45, .42, .36]; %.45,
+finish = [.7, .75, .9, .88, .85]; % .85, 
+
+
+% filenames = {'12-07-2016/sine_1Hz_6.log',...
+%   '12-07-2016/sine_2Hz_6.log',...
+%   '12-07-2016/sine_0_5Hz_6.log'};
+% 
+% start = [.4, .5, .42] ; %.45,
+% finish = [.6,  .6, .5]; % .85, 
+
+
+% filenames = {'12-08-2016/swingup_closedloop.log'};
+% start = .75;
+% finish = .95;
+
 
 
 % filenames = filenames(1);
@@ -38,6 +44,7 @@ data = {};
 for i=1:length(filenames),
 %   file_times = start(i):.02:finish(i);
   file_times = [start(i):.02:finish(i)];
+% file_times = [start(i) finish(i)];
   for j=1:length(file_times)-1,
     [sysiddata{end+1},x0{end+1},data{end+1}] = createIDDataFromLog(filenames{i},file_times(j),file_times(j+1));
   end
@@ -127,9 +134,12 @@ InitParams(9).Minimum = .01;
 
 InitParams(10).Name = 'r1';
 InitParams(10).Minimum = -inf;
-  
+
 % from 12/5
-Parameters =     [    2.2244    0.5508    0.5134    0.8039    0.8362    0.2078    0.0390    0.8999    0.2293 0];
+% Parameters =     [    2.2244    0.5508    0.5134    0.8039    0.8362    0.2078    0.0390    0.8999    0.2293 0];
+
+% from 12/8
+ Parameters =  [2.3865    0.3743    0.5690    1.3408    2.0589    0.0547    0.0288    1.6038    0.4172   -0.0243*0];
   
 for i=1:length(InitParams),
   InitParams(i).Value = Parameters(i);
@@ -165,7 +175,7 @@ end
 
 nlgr = idnlgrey(FileName, Order, InitParams, InitialStates, Ts);
 %%
-nlgr = pem(z, nlgr, 'Display', 'Full','MaxIter',100);
+nlgr = pem(z, nlgr, 'Display', 'Full','MaxIter',5);
 
 % figure;
 % compare(getexp(z,1), nlgr);
@@ -182,8 +192,9 @@ p = nlgr.Report.Parameters;
 
 % 8,12, 39, 41, 44, 45, 49, 51, 53, 55, 80
 %%
-i = i+1
+i = 1
 plant = AcrobotPlantSmooth(p.ParVector);
+% plant = AcrobotPlantSmooth();
 experiment = getexp(z,i);
 t_exp = experiment.Ts*(0:length(experiment.InputData)-1);
 utraj = PPTrajectory(foh(t_exp,experiment.InputData'));

@@ -48,10 +48,10 @@ classdef AcrobotPlantSmooth < Manipulator
 %         params = [2.2244 0.5508 0.5134 0.8039 0.8362 0.2078 0.0390 0.8999 0.2293];
         % December 7, 2016 (mposa)
         % with masses
-%         params =  [1.8719    0.1486    0.5131    1.0536    3.0806    0.2048    0.0391    0.9953    0.2282];
+%         params =  [1.8719    0.1486    0.5131    1.0536    3.0806    0.2048    0.0391    0.9953    0.2282 0];
         
-        % December 8, with r1 mass offset
-        params =  [2.3865    0.3743    0.5690    1.3408    2.0589    0.0547    0.0288    1.6038    0.4172   -0.0243];
+        params = [    2.6631    0.2732    0.5407    1.2449    2.9417    0.2770    0.1174    1.7551    0.4087    0.0101];
+
 
       end
       obj.m1 = params(1);
@@ -63,13 +63,13 @@ classdef AcrobotPlantSmooth < Manipulator
       obj.b2 = params(7);
       obj.I1 = params(8);
       obj.I2 = params(9);
+      obj.r1 = params(10);
     end    
     
     function [t,dt] = test(obj,q,v)
       [H,C,B,dH,dC,dB] = manipulatorDynamics(obj,q,v);
       t = C;
-      dt = dC;
-    
+      dt = dC;    
     end
     
     function [H,C,B,dH,dC,dB] = manipulatorDynamics(obj,q,v)      
@@ -81,26 +81,15 @@ classdef AcrobotPlantSmooth < Manipulator
       c = cos(q(1:2,:));  s = sin(q(1:2,:));  s12 = sin(q(1,:)+q(2,:)); c12 = cos(q(1,:)+q(2,:));
       
       h12 = I2 + m2l1lc2*c(2);
-      H = [ I1 + I2 + m2*l1^2 + 2*m2l1lc2*c(2), h12; h12, I2 ];
-      
-      % new code to horizontally offset com of link 1
-      m2r12 = m2*r1^2;
-      m2l1r1s2 = m2*r1*l1*s(2);
-      m2l1r1c2 = m2*r1*l1*c(2);
-      H2 =  [m2r12+2*m2l1r1s2, m2r12+m2l1r1s2; m2r12+m2l1r1s2, m2r12];
-      
-      H = H+H2;
-      
-      
+      H = [ I1 + I2 + m2*l1^2 + 2*m2l1lc2*c(2) + r1^2*I1, h12; h12, I2 ];
+
       C1 = [ -2*m2l1lc2*s(2)*v(2), -m2l1lc2*s(2)*v(2); m2l1lc2*s(2)*v(1), 0 ];
       
 
       
       G = g*[ m1*lc1*s(1) + m2*(l1*s(1)+lc2*s12); m2*lc2*s12 ];
       
-      
-      C2 = [g*m2*r1*(s(2)*s(1)-c(2)*c(1)) + m2l1r1c2*(v(2)^2+2*v(1)*v(2));  g*m2*r1*(s(2)*s(1)-c(2)*c(1))-m2l1r1c2*v(2)^2];     
-      
+      C2 = [-g*r1*I1*c(1);0 ];
       
       
       % accumate total C and add a damping term:
@@ -111,9 +100,8 @@ classdef AcrobotPlantSmooth < Manipulator
       
       if nargout > 1
         dHdq = [zeros(4,1) [-2*m2l1lc2*s(2); -m2l1lc2*s(2); -m2l1lc2*s(2);0]];
-        dH2dq = [zeros(4,1) [2*m2l1r1c2; m2l1r1c2; m2l1r1c2; 0]];
         
-        dH = [dHdq+dH2dq zeros(4,2)];
+        dH = [dHdq zeros(4,2)];
         
         
         
@@ -121,8 +109,8 @@ classdef AcrobotPlantSmooth < Manipulator
         dC1dq2 = [-2*m2l1lc2*c(2)*v(2); m2l1lc2*c(2)*v(1);-m2l1lc2*c(2)*v(2); 0];
         dC1dv = [0 -2*m2l1lc2*s(2); m2l1lc2*s(2) 0; 0 -m2l1lc2*s(2); 0 0];
         dC1 = [zeros(4,1), dC1dq2, dC1dv];
-        dC2 = [g*m2*r1*(s(2)*c(1)+c(2)*s(1)) g*m2*r1*(c(2)*s(1)+s(2)*c(1))-m2l1r1s2*(v(2)^2+2*v(1)*v(2)) 2*m2l1r1c2*v(2) 2*m2l1r1c2*(v(2)+v(1)); ...
-             g*m2*r1*(s(2)*c(1)+c(2)*s(1)) g*m2*r1*(c(2)*s(1)+s(2)*c(1)) 0 -2*m2l1r1c2*v(2)];
+
+        dC2 = [g*r1*I1*s(1) 0 0 0;0 0 0 0];
            
         dC = matGradMult(dC1,v) + [zeros(2,2) C1+b] + dG + dC2;
         
@@ -138,6 +126,15 @@ classdef AcrobotPlantSmooth < Manipulator
       x = [0 0 0 0]';
     end
     
+    function [q0,q1] = calculateEquilibria(obj)
+      function y = f0(q)
+        qdd = obj.dynamics(0,[q;0;0],0);
+        y = qdd(3)^2 + qdd(4)^2;
+      end
+      opt = optimset('Display','off');
+      q0 = fminunc(@f0,[0;0],opt);      
+      q1 = fminunc(@f0,[pi;0],opt);    
+    end    
   end
   
 end

@@ -2,7 +2,7 @@ checkDependency('lcm');
 javaaddpath('LCMTypes/acrobot_types.jar')
 
 % filename = 'AcrobotLogs/11-11-2016/lcmlog-2016-11-11.00';
-filename = '12-07-2016/sine_0_5Hz_6.log';
+filename = '12-08-2016/swingup_closedloop.log';
 
 setenv('PYTHONPATH',strcat(pwd,'/LCMTypes/'));
   oldfile = strcat('AcrobotLogs/',filename);
@@ -11,7 +11,7 @@ setenv('PYTHONPATH',strcat(pwd,'/LCMTypes/'));
 
 channels = {'acrobot_y','acrobot_xhat','acrobot_u','acrobot_out'};
 coders = {AcrobotYCoder(),AcrobotStateCoder(),AcrobotInputCoder(),AcrobotOutCoder()};
-data = readLog(newfile,channels,coders,0,1);
+data = readLog(newfile,channels,coders,.66,1);
 
 %%
 plant = AcrobotPlantSmooth;
@@ -58,11 +58,11 @@ vdot_diff_filt = [filter(hamming(5),sum(hamming(5)),vdot_diff(1,:)); filter(hamm
 
 figure(3)
 subplot(2,1,1)
-plot(t,vdot_diff(1,:),t,xdot(3,:))
+plot(t,vdot_diff_filt(1,:),t,xdot(3,:))
 legend('diff','model')
 title('vdot comparison')
 subplot(2,1,2)
-plot(t,vdot_diff(2,:),t,xdot(4,:))
+plot(t,vdot_diff_filt(2,:),t,xdot(4,:))
 legend('diff','model')
 % %% mimic state estimate
 % x_est = x*0;
