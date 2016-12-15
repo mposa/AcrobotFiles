@@ -4,15 +4,15 @@
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
  xsi:schemaLocation="http://drake.mit.edu ../../../doc/drakeURDF.xsd" name="Acrobot">
 
-  <parameter name="b1" value=".1" lb="0" />
-  <parameter name="b2" value=".1" lb="0" />
+  <parameter name="m1" value="1" lb="0" />
+  <parameter name="m2" value="1" lb="0" />
   <parameter name="l1" value="1" lb="0" />
   <parameter name="lc1" value=".5" lb="0" />
   <parameter name="lc2" value="1" lb="0" />
+  <parameter name="b1" value=".1" lb="0" />
+  <parameter name="b2" value=".1" lb="0" />
   <parameter name="Ic1" value=".083" lb="0" />
   <parameter name="Ic2" value=".33" lb="0" />
-  <parameter name="m1" value="1" lb="0" />
-  <parameter name="m2" value="1" lb="0" />
   <parameter name="rc1" value="0"  />
 
   <link name="base_link">
