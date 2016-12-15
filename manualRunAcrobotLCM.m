@@ -13,6 +13,8 @@ function manualRunAcrobotLCM(estimator,controller,est_state,dt)
   
   msg = aggregator.getNextMessage();  
   
+  isController = ~isempty(controller);
+  
   tic;
   tnext = dt;
  
@@ -28,15 +30,16 @@ function manualRunAcrobotLCM(estimator,controller,est_state,dt)
     
     y=lcm_y_coder.decode(msg);
     t = toc;
-    est_state = estimator.update(t,est_state,y);
+    est_state = estimator.update(t,est_state,y);    
     xhat = estimator.output(t,est_state,y);
-    u = controller.output(t,[],xhat);
-    
-    control_msg = lcm_u_coder.encode(t,u);
-    lc.publish('acrobot_u',control_msg);      
+    if isController      
+      u = controller.output(t,[],xhat);
+      control_msg = lcm_u_coder.encode(t,u);
+      lc.publish('acrobot_u',control_msg);      
+    end  
     
     if t > tnext + 10*dt
-      error('Behind by more than 10xdt!')
+%       error('Behind by more than 10xdt!')
     end
   end
 

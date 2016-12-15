@@ -11,13 +11,13 @@ classdef AcrobotStateCoder < LCMCoder
             msg = acrobot_types.lcmt_acrobot_x(msg.data);
           end
           x = [msg.theta1; msg.theta2; msg.theta1Dot; msg.theta2Dot];
-          t = msg.timestamp/1000;
+          t = msg.timestamp/1e6;
       end
     
       function msg = encode(obj,t,x)
           % encodes the state message
           msg = acrobot_types.lcmt_acrobot_x();
-          msg.timestamp = t*1000;
+          msg.timestamp = t*1e6;
           msg.theta1 = x(1); 
           msg.theta2 = x(2);
           msg.theta1Dot = x(3);

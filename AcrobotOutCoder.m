@@ -7,7 +7,7 @@ classdef AcrobotOutCoder < LCMCoder
           % decodes the state message
           msg = acrobot_types.lcmt_motor_state(msg.data);
           x = [msg.current; msg.position; msg.position2; msg.fault];
-          t = msg.timestamp/1000;
+          t = msg.timestamp/1e6;
       end
     
       function msg = encode(obj,t,x)

@@ -16,12 +16,12 @@ classdef AcrobotYCoder < LCMCoder
           conv = [-2*pi/ticks_1; 2*pi/ticks_2; -1/0.003455]; %0.003455 is reverting a multiplication in SensorAccumulator.cpp 
           y = conv.*y;
           %warning('thetadot not implemented yet');
-          t = msg.timestamp/1000;
+          t = msg.timestamp/1e6;
       end
     
       function msg = encode(obj,t,y)
           msg = acrobot_types.lcmt_acrobot_y();
-          msg.timestamp = t*1000;
+          msg.timestamp = t*1e6;
           msg.theta1 = -y(1); % sign flip to match ecoder
           msg.theta2 = y(2);
 %           warning('tau as output is not implemented yet');

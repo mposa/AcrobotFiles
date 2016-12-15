@@ -45,12 +45,16 @@ classdef AcrobotPlantSmooth < Manipulator
       
       if nargin < 1
         % July 26
-%         params = [2.2244 0.5508 0.5134 0.8039 0.8362 0.2078 0.0390 0.8999 0.2293];
+%         params = [2.2244 0.5508 0.5134 0.8039 0.8362 0.2078 0.0390 0.8999 0.2293 0];
         % December 7, 2016 (mposa)
         % with masses
 %         params =  [1.8719    0.1486    0.5131    1.0536    3.0806    0.2048    0.0391    0.9953    0.2282 0];
         
-        params = [    2.6631    0.2732    0.5407    1.2449    2.9417    0.2770    0.1174    1.7551    0.4087    0.0101];
+%         params = [    2.6631    0.2732    0.5407    1.2449    2.9417    0.2770    0.1174    1.7551    0.4087    0.0101];
+        
+        % December 12
+        params = [    2.4367    0.6178    0.5263    1.6738    1.5651    0.0320    0.0413    2.0824    0.5065    0.0011];
+
 
 
       end
@@ -89,12 +93,12 @@ classdef AcrobotPlantSmooth < Manipulator
       
       G = g*[ m1*lc1*s(1) + m2*(l1*s(1)+lc2*s12); m2*lc2*s12 ];
       
-      C2 = [-g*r1*I1*c(1);0 ];
+      G2 = [-g*r1*I1*c(1);0 ];
       
       
       % accumate total C and add a damping term:
       b = diag([b1;b2]);
-      C = C1*v + G + b*v + C2;
+      C = C1*v + G + b*v + G2;
       
       B = [0; 1];
       
@@ -110,9 +114,9 @@ classdef AcrobotPlantSmooth < Manipulator
         dC1dv = [0 -2*m2l1lc2*s(2); m2l1lc2*s(2) 0; 0 -m2l1lc2*s(2); 0 0];
         dC1 = [zeros(4,1), dC1dq2, dC1dv];
 
-        dC2 = [g*r1*I1*s(1) 0 0 0;0 0 0 0];
+        dG2 = [g*r1*I1*s(1) 0 0 0;0 0 0 0];
            
-        dC = matGradMult(dC1,v) + [zeros(2,2) C1+b] + dG + dC2;
+        dC = matGradMult(dC1,v) + [zeros(2,2) C1+b] + dG + dG2;
         
         dB = zeros(2,4);
       end

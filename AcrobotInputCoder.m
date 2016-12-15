@@ -7,13 +7,13 @@ classdef AcrobotInputCoder < LCMCoder
           % decodes the input message
           msg = acrobot_types.lcmt_acrobot_u(msg.data);
           u = -msg.tau;
-          t = msg.timestamp/1000;
+          t = msg.timestamp/1e6;
       end
     
       function msg = encode(obj,t,u)
           % encodes the input message
           msg = acrobot_types.lcmt_acrobot_u();
-          msg.timestamp = t*1000;
+          msg.timestamp = t*1e6;
           msg.tau = -u(1); % Notice sign flip! This makes sure things are same as robotlib visualizer
       end
     
